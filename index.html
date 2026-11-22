@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tính tiền cầu lông</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --green: #0f6e56;
+      --green-light: #e1f5ee;
+      --green-mid: #5dcaa5;
+      --bg: #f6f5f0;
+      --card: #ffffff;
+      --border: #e2e0d8;
+      --text: #1a1a18;
+      --muted: #7a7870;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --sans: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      padding: max(18px, env(safe-area-inset-top)) 14px max(32px, env(safe-area-inset-bottom));
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      width: min(100%, 680px);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .logo {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--green);
+      color: #fff;
+      font-size: 22px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 600;
+    }
+
+    header p {
+      margin: 3px 0 0;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .sec-title {
+      margin-bottom: 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(130px, 160px) 34px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field label {
+      min-width: 0;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .field small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input[type=number],
+    input[type=text],
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+
+    textarea {
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    input[type=number] {
+      text-align: right;
+    }
+
+    input[type=text] {
+      text-align: left;
+    }
+
+    input.money-input {
+      text-align: right;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--green-mid);
+      background: #fff;
+    }
+
+    .unit {
+      min-width: 30px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .shuttle-header,
+    .shuttle-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) 112px 96px 42px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .shuttle-header {
+      margin-bottom: 8px;
+    }
+
+    .shuttle-header span {
+      color: var(--muted);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .shuttle-header span:first-child {
+      text-align: left;
+    }
+
+    .shuttle-row {
+      margin-bottom: 8px;
+    }
+
+    .shuttle-field {
+      min-width: 0;
+    }
+
+    .shuttle-field label {
+      display: none;
+    }
+
+    .shuttle-row input {
+      min-width: 0;
+    }
+
+    .del-btn {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .del-btn:hover,
+    .del-btn:focus-visible {
+      background: var(--danger-bg);
+      border-color: #fca5a5;
+      color: var(--danger);
+    }
+
+    .add-btn,
+    .btn {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .add-btn {
+      margin-top: 6px;
+      padding: 8px 14px;
+      border: 1px dashed var(--green-mid);
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .add-btn:hover {
+      background: #c8eee1;
+    }
+
+    .tong-san {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+    }
+
+    .tong-san .label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tong-san .val {
+      color: var(--green);
+      font-size: 17px;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      min-width: 0;
+      border-radius: 10px;
+      background: var(--bg);
+      padding: 12px 14px;
+    }
+
+    .metric .mlabel {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .metric .mval {
+      overflow-wrap: anywhere;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .metric.big {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--green);
+      padding: 15px 18px;
+    }
+
+    .metric.big .mlabel {
+      margin: 0;
+      color: rgba(255, 255, 255, .76);
+      font-size: 13px;
+    }
+
+    .metric.big .mval {
+      color: #fff;
+      font-size: 28px;
+      text-align: right;
+    }
+
+    .breakdown {
+      margin-top: 4px;
+    }
+
+    .brow {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      padding: 7px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .brow span:first-child {
+      min-width: 0;
+    }
+
+    .brow span:last-child {
+      flex: 0 0 auto;
+      color: var(--text);
+      text-align: right;
+    }
+
+    .brow:last-child {
+      border-bottom: none;
+    }
+
+    .brow.total-row {
+      padding-top: 11px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .share-area {
+      margin-top: 12px;
+      border-radius: 10px;
+      background: var(--bg);
+      padding: 12px;
+    }
+
+    .share-area pre {
+      margin: 0;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .btn:hover {
+      background: #f1f0ea;
+    }
+
+    .btn.primary {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: #0d5e49;
+    }
+
+    .bank-row {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bank-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .bank-row label {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .saved-accounts {
+      margin-top: 14px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    .saved-accounts-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .saved-accounts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .account-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .account-group-title {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 140px;
+      color: var(--text);
+    }
+
+    .account-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+      user-select: none;
+      white-space: pre-wrap;
+    }
+
+    .account-badge:hover {
+      background: var(--green-light);
+      border-color: var(--green-mid);
+      color: var(--green);
+    }
+
+    .account-badge .remove-acc {
+      margin-left: 4px;
+      font-weight: bold;
+      color: var(--muted);
+      transition: color .15s;
+    }
+
+    .account-badge .remove-acc:hover {
+      color: var(--danger);
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      header {
+        margin-bottom: 14px;
+        padding: 0 2px;
+      }
+
+      header h1 {
+        font-size: 20px;
+      }
+
+      .card {
+        border-radius: 10px;
+        padding: 15px 12px;
+        margin-bottom: 10px;
+      }
+
+      .field {
+        grid-template-columns: 1fr 112px 26px;
+        gap: 8px;
+      }
+
+      .field label {
+        font-size: 13px;
+      }
+
+      .shuttle-header {
+        display: none;
+      }
+
+      .shuttle-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px;
+        grid-template-areas:
+          "name name delete"
+          "price qty delete";
+        gap: 8px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fbfaf6;
+        padding: 8px;
+      }
+
+      .shuttle-field {
+        position: relative;
+      }
+
+      .shuttle-field label {
+        position: absolute;
+        top: 7px;
+        left: 12px;
+        z-index: 1;
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1;
+        pointer-events: none;
+      }
+
+      .shuttle-field input {
+        min-height: 48px;
+        padding-top: 21px;
+        padding-bottom: 7px;
+      }
+
+      .shuttle-field.name {
+        grid-area: name;
+      }
+
+      .shuttle-field.price {
+        grid-area: price;
+      }
+
+      .shuttle-field.qty {
+        grid-area: qty;
+      }
+
+      .shuttle-row .del-btn {
+        grid-area: delete;
+        height: 100%;
+      }
+
+      .add-btn {
+        width: 100%;
+      }
+
+      .metric {
+        padding: 11px 10px;
+      }
+
+      .metric .mval {
+        font-size: 16px;
+      }
+
+      .metric.big {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+        padding: 14px;
+      }
+
+      .metric.big .mval {
+        width: 100%;
+        font-size: 27px;
+        text-align: left;
+      }
+
+      .btn-row {
+        grid-template-columns: 1fr;
+      }
+
+      .bank-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .field {
+        grid-template-columns: 1fr;
+      }
+
+      .unit {
+        margin-top: -6px;
+        text-align: right;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .metric.big {
+        grid-column: auto;
+      }
+
+      .brow {
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .brow span:last-child {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <div class="logo" aria-hidden="true">🏸</div>
+      <div>
+        <h1>Tính tiền cầu lông</h1>
+        <p>Dành cho host, tính nhanh rồi gửi nhóm</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="shuttle-title">
+        <div class="sec-title" id="shuttle-title">Cầu lông</div>
+        <div class="shuttle-header">
+          <span>Loại cầu</span>
+          <span>Giá / ống</span>
+          <span>Số quả</span>
+          <span></span>
+        </div>
+        <div id="shuttle-list"></div>
+        <button class="add-btn" type="button" onclick="addShuttle()">+ Thêm loại cầu</button>
+      </section>
+
+      <section class="card" aria-labelledby="court-title">
+        <div class="sec-title" id="court-title">Sân</div>
+        <div class="field">
+          <label for="so-san">Số sân thuê</label>
+          <input type="number" id="so-san" min="1" inputmode="decimal" autocomplete="off" oninput="calc()">
+          <span class="unit">sân</span>
+        </div>
+        <div class="field">
+          <label for="gia-san">Tiền sân / sân</label>
+          <input type="text" class="money-input" id="gia-san" inputmode="numeric" autocomplete="off"
+            oninput="formatMoneyField(this);calc()">
+          <span class="unit">đ</span>
+        </div>
+        <div class="tong-san">
+          <span class="label">Tổng tiền sân</span>
+          <span class="val" id="tong-san-val">0đ</span>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="member-title">
+        <div class="sec-title" id="member-title">Thành viên & chi phí khác</div>
+        <div class="field">
+          <label for="so-nguoi">Số thành viên</label>
+          <input type="number" id="so-nguoi" min="1" inputmode="numeric" autocomplete="off" oninput="calc()">
+          <span class="unit">người</span>
+        </div>
+        <div class="field">
+          <label for="khac">Chi phí khác <small>nước, trà đá...</small></label>
+          <input type="text" class="money-input" id="khac" inputmode="numeric" autocomplete="off"
+            oninput="formatMoneyField(this);calc()">
+          <span class="unit">đ</span>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="result-title">
+        <div class="sec-title" id="result-title">Kết quả</div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="mlabel">Tổng tiền sân</div>
+            <div class="mval" id="m-san">0đ</div>
+          </div>
+          <div class="metric">
+            <div class="mlabel">Tổng tiền cầu</div>
+            <div class="mval" id="m-cau">0đ</div>
+          </div>
+          <div class="metric big">
+            <div class="mlabel">Mỗi người đóng</div>
+            <div class="mval" id="m-per">0đ</div>
+          </div>
+        </div>
+
+        <div class="breakdown" id="breakdown"></div>
+
+        <div class="share-area">
+          <pre id="share-text"></pre>
+          <div class="btn-row">
+            <button class="btn primary" type="button" onclick="copyText(event)">📋 Copy gửi nhóm</button>
+            <button class="btn" type="button" onclick="resetAll()">Làm lại</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="bank-title">
+        <div class="sec-title" id="bank-title">Thông tin chuyển khoản</div>
+        <div class="bank-row">
+          <label for="chu-tk">Tên chủ TK</label>
+          <input type="text" id="chu-tk" value="Dang Thi Thu" autocomplete="off" oninput="calc()">
+        </div>
+        <div class="bank-row" style="align-items: flex-start;">
+          <label for="bank-info" style="margin-top: 10px;">Thông tin chuyển khoản</label>
+          <textarea id="bank-info" rows="3" placeholder="Ví dụ:&#10;Vietinbank 105879843175&#10;Momo 0986274033"
+            autocomplete="off" oninput="calc()">Vietinbank 105879843175</textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="add-btn" type="button" onclick="saveCurrentAccount()"
+            style="margin-top: 0; padding: 6px 12px; font-size: 12px;">+ Lưu tài khoản này</button>
+        </div>
+        <div class="saved-accounts">
+          <div class="saved-accounts-title">Tài khoản đã lưu (Click để chọn nhanh)</div>
+          <div id="saved-accounts-list" class="saved-accounts-list"></div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script>
+    let shuttles = [
+      { name: "", price: "", qty: "" }
+    ];
+
+    let savedAccounts = [];
+
+    const BALLS_PER_TUBE = 12;
+    const CACHE_KEY = "badmintonCalculatorState";
+
+    function defaultState() {
+      const defaultAccs = [
+        { owner: "Dang Thi Thu", info: "Vietinbank 105879843175\nMomo 0986274033" },
+        { owner: "Tran Dang Duy Tien", info: "Vietcombank 0721000558964\nMomo 0366446318" },
+      ];
+      return {
+        shuttles: [{ name: "", price: "", qty: "" }],
+        soSan: "",
+        giaSan: "",
+        soNguoi: "",
+        khac: "",
+        chuTk: defaultAccs[0].owner,
+        bankInfo: defaultAccs[0].info,
+        savedAccounts: defaultAccs
+      };
+    }
+
+    function loadCache() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+        if (!cached || typeof cached !== "object") return;
+
+        if (Array.isArray(cached.shuttles) && cached.shuttles.length > 0) {
+          shuttles = cached.shuttles.map(s => ({
+            name: String(s.name || ""),
+            price: s.price === "" || s.price === null || s.price === undefined ? "" : parseMoney(s.price) || 0,
+            qty: s.qty === "" || s.qty === null || s.qty === undefined ? "" : parseFloat(s.qty) || 0
+          }));
+        }
+
+        // Tương thích ngược từ các phiên bản trước
+        if (cached.banks && Array.isArray(cached.banks)) {
+          const primaryBank = cached.banks[0] || {};
+          cached.bankInfo = ((primaryBank.name || "Vietinbank") + " " + (primaryBank.no || "")).trim();
+          cached.savedAccounts = cached.banks.map(b => ({
+            owner: cached.chuTk || "Dang Thi Thu",
+            info: ((b.name || "") + " " + (b.no || "")).trim()
+          }));
+        } else if (Array.isArray(cached.savedAccounts) && cached.savedAccounts.length > 0 && ('bank' in cached.savedAccounts[0] || 'no' in cached.savedAccounts[0])) {
+          cached.savedAccounts = cached.savedAccounts.map(a => ({
+            owner: String(a.owner || ""),
+            info: ((a.bank || "") + " " + (a.no || "")).trim()
+          }));
+          cached.bankInfo = ((cached.bankName || "Vietinbank") + " " + (cached.bankNo || "")).trim();
+        } else if (!cached.savedAccounts) {
+          cached.savedAccounts = [
+            { owner: "Dang Thi Thu", info: "Vietinbank 105879843175" },
+            { owner: "Dang Thi Thu", info: "Momo 0986274033" },
+            { owner: "Tran Dang Duy Tien", info: "Vietcombank 0721000558964" }
+          ];
+          cached.bankInfo = "Vietinbank 105879843175";
+        }
+
+        if (Array.isArray(cached.savedAccounts)) {
+          savedAccounts = cached.savedAccounts.map(a => ({
+            owner: String(a.owner || ""),
+            info: String(a.info || "")
+          }));
+        }
+
+        setInputValue("so-san", cached.soSan);
+        setInputValue("gia-san", cached.giaSan);
+        setInputValue("so-nguoi", cached.soNguoi);
+        setInputValue("khac", cached.khac);
+        setInputValue("chu-tk", cached.chuTk || "Dang Thi Thu");
+        setInputValue("bank-info", cached.bankInfo || "Vietinbank 105879843175");
+      } catch (error) {
+        localStorage.removeItem(CACHE_KEY);
+      }
+
+      ensureShuttleRow();
+      ensureSavedAccounts();
+    }
+
+    function setInputValue(id, value) {
+      if (value === undefined || value === null) return;
+      const input = document.getElementById(id);
+      input.value = input.classList.contains("money-input") ? formatMoneyValue(value) : value;
+    }
+
+    function applyState(state) {
+      shuttles = state.shuttles.map(s => ({
+        name: String(s.name || ""),
+        price: s.price === "" || s.price === null || s.price === undefined ? "" : parseMoney(s.price) || 0,
+        qty: s.qty === "" || s.qty === null || s.qty === undefined ? "" : parseFloat(s.qty) || 0
+      }));
+      ensureShuttleRow();
+
+      if (Array.isArray(state.savedAccounts) && state.savedAccounts.length > 0) {
+        savedAccounts = state.savedAccounts.map(a => ({
+          owner: String(a.owner || ""),
+          info: String(a.info || "")
+        }));
+      } else {
+        savedAccounts = [];
+      }
+      ensureSavedAccounts();
+
+      setInputValue("so-san", state.soSan);
+      setInputValue("gia-san", state.giaSan);
+      setInputValue("so-nguoi", state.soNguoi);
+      setInputValue("khac", state.khac);
+      setInputValue("chu-tk", state.chuTk || "Dang Thi Thu");
+      setInputValue("bank-info", state.bankInfo || "Vietinbank 105879843175");
+    }
+
+    function saveCache() {
+      const state = {
+        shuttles,
+        soSan: document.getElementById("so-san").value,
+        giaSan: document.getElementById("gia-san").value,
+        soNguoi: document.getElementById("so-nguoi").value,
+        khac: document.getElementById("khac").value,
+        chuTk: document.getElementById("chu-tk").value,
+        bankInfo: document.getElementById("bank-info").value,
+        savedAccounts
+      };
+
+      localStorage.setItem(CACHE_KEY, JSON.stringify(state));
+    }
+
+    function fmt(n) {
+      return Math.round(Number(n) || 0).toLocaleString("vi-VN") + "đ";
+    }
+
+    function fmtCopy(n) {
+      const amount = Math.round(Number(n) || 0);
+      if (amount === 0) return "0đ";
+      return `${Math.ceil(amount / 1000)}k`;
+    }
+
+    function parseMoney(value) {
+      const digits = String(value || "").replace(/\D/g, "");
+      return digits ? parseInt(digits, 10) : 0;
+    }
+
+    function formatMoneyValue(value) {
+      const amount = parseMoney(value);
+      return amount ? amount.toLocaleString("vi-VN") : "";
+    }
+
+    function formatMoneyField(input) {
+      input.value = formatMoneyValue(input.value);
+    }
+
+    function renderShuttles() {
+      ensureShuttleRow();
+      const el = document.getElementById("shuttle-list");
+      el.textContent = "";
+
+      shuttles.forEach((s, i) => {
+        const row = document.createElement("div");
+        row.className = "shuttle-row";
+
+        const nameField = createShuttleField("name", "Loại cầu");
+        const name = document.createElement("input");
+        name.type = "text";
+        name.value = s.name;
+        name.placeholder = "Tên loại cầu";
+        name.setAttribute("aria-label", "Tên loại cầu");
+        name.addEventListener("input", () => {
+          name.value = titleCaseWords(name.value);
+          shuttles[i].name = name.value;
+          calc();
+        });
+        nameField.append(name);
+
+        const priceField = createShuttleField("price", "Giá / ống");
+        const price = document.createElement("input");
+        price.type = "text";
+        price.className = "money-input";
+        price.value = formatMoneyValue(s.price);
+        price.inputMode = "numeric";
+        price.setAttribute("aria-label", "Giá mỗi ống");
+        price.addEventListener("input", () => {
+          formatMoneyField(price);
+          shuttles[i].price = parseMoney(price.value) || "";
+          calc();
+        });
+        priceField.append(price);
+
+        const qtyField = createShuttleField("qty", "Số quả");
+        const qty = document.createElement("input");
+        qty.type = "number";
+        qty.value = s.qty;
+        qty.min = "0";
+        qty.inputMode = "decimal";
+        qty.setAttribute("aria-label", "Số quả dùng");
+        qty.addEventListener("input", () => {
+          shuttles[i].qty = parseFloat(qty.value) || 0;
+          calc();
+        });
+        qtyField.append(qty);
+
+        const remove = document.createElement("button");
+        remove.className = "del-btn";
+        remove.type = "button";
+        remove.title = "Xóa loại cầu";
+        remove.setAttribute("aria-label", "Xóa loại cầu");
+        remove.textContent = "×";
+        remove.addEventListener("click", () => removeShuttle(i));
+
+        row.append(nameField, priceField, qtyField, remove);
+        el.append(row);
+      });
+    }
+
+    function ensureShuttleRow() {
+      if (!Array.isArray(shuttles) || shuttles.length === 0) {
+        shuttles = [{ name: "", price: "", qty: "" }];
+      }
+    }
+
+    function titleCaseWords(value) {
+      return value.replace(/\S+/g, word => word.charAt(0).toLocaleUpperCase("vi-VN") + word.slice(1));
+    }
+
+    function createShuttleField(className, labelText) {
+      const field = document.createElement("div");
+      field.className = `shuttle-field ${className}`;
+
+      const label = document.createElement("label");
+      label.textContent = labelText;
+      field.append(label);
+
+      return field;
+    }
+
+    function addShuttle() {
+      shuttles.push({ name: "", price: "", qty: "" });
+      renderShuttles();
+      calc();
+    }
+
+    function removeShuttle(i) {
+      if (shuttles.length <= 1) return;
+      shuttles.splice(i, 1);
+      renderShuttles();
+      calc();
+    }
+
+    function ensureSavedAccounts() {
+      if (!Array.isArray(savedAccounts) || savedAccounts.length === 0) {
+        savedAccounts = [
+          { owner: "Dang Thi Thu", info: "Vietinbank 105879843175\nMomo 0986274033" },
+          { owner: "Tran Dang Duy Tien", info: "Vietcombank 0721000558964\nMomo 0366446318" }
+        ];
+      }
+    }
+
+    function renderSavedAccounts() {
+      ensureSavedAccounts();
+      const el = document.getElementById("saved-accounts-list");
+      el.textContent = "";
+
+      // Gom nhóm theo owner
+      const grouped = {};
+      savedAccounts.forEach((acc, i) => {
+        if (!grouped[acc.owner]) {
+          grouped[acc.owner] = [];
+        }
+        grouped[acc.owner].push({ ...acc, originalIndex: i });
+      });
+
+      // Tạo hiển thị cho từng nhóm
+      Object.keys(grouped).forEach(owner => {
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "account-group";
+
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "account-group-title";
+        titleDiv.textContent = owner;
+        titleDiv.title = `Click để chọn tất cả tài khoản của ${owner}`;
+        titleDiv.style.cursor = "pointer";
+        titleDiv.style.textDecoration = "underline dashed var(--muted)";
+        titleDiv.addEventListener("click", () => selectAllAccountsOfOwner(owner));
+        groupDiv.append(titleDiv);
+
+        grouped[owner].forEach(acc => {
+          const badge = document.createElement("span");
+          badge.className = "account-badge";
+          badge.title = `Chủ TK: ${acc.owner}\nThông tin: ${acc.info}`;
+          badge.textContent = acc.info;
+          badge.addEventListener("click", () => selectAccount(acc.originalIndex));
+
+          const removeBtn = document.createElement("span");
+          removeBtn.className = "remove-acc";
+          removeBtn.textContent = "×";
+          removeBtn.title = "Xóa tài khoản này";
+          removeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeSavedAccount(acc.originalIndex);
+          });
+
+          badge.append(removeBtn);
+          groupDiv.append(badge);
+        });
+
+        el.append(groupDiv);
+      });
+    }
+
+    function selectAccount(i) {
+      const acc = savedAccounts[i];
+      if (!acc) return;
+      document.getElementById("chu-tk").value = acc.owner;
+      document.getElementById("bank-info").value = acc.info;
+      calc();
+    }
+
+    function selectAllAccountsOfOwner(owner) {
+      const infos = savedAccounts
+        .filter(acc => acc.owner === owner)
+        .map(acc => acc.info)
+        .join("\n");
+      document.getElementById("chu-tk").value = owner;
+      document.getElementById("bank-info").value = infos;
+      calc();
+    }
+
+    function saveCurrentAccount() {
+      const owner = document.getElementById("chu-tk").value.trim();
+      const info = document.getElementById("bank-info").value.trim();
+
+      if (!owner || !info) {
+        alert("Vui lòng nhập đầy đủ Chủ TK và Thông tin chuyển khoản để lưu!");
+        return;
+      }
+
+      // Tránh trùng lặp hoàn toàn
+      const exists = savedAccounts.some(acc => acc.owner === owner && acc.info === info);
+      if (exists) {
+        alert("Tài khoản này đã tồn tại trong danh sách đã lưu!");
+        return;
+      }
+
+      savedAccounts.push({ owner, info });
+      renderSavedAccounts();
+      saveCache();
+    }
+
+    function removeSavedAccount(i) {
+      if (confirm(`Bạn có chắc chắn muốn xóa tài khoản "${savedAccounts[i].owner} - ${savedAccounts[i].info}" khỏi danh sách đã lưu?`)) {
+        savedAccounts.splice(i, 1);
+        renderSavedAccounts();
+        saveCache();
+      }
+    }
+
+    function calc() {
+      const soSan = parseFloat(document.getElementById("so-san").value) || 0;
+      const giaSan = parseMoney(document.getElementById("gia-san").value);
+      const soNguoi = parseFloat(document.getElementById("so-nguoi").value) || 0;
+      const khac = parseMoney(document.getElementById("khac").value);
+      const chuTk = document.getElementById("chu-tk").value;
+      const bankInfo = document.getElementById("bank-info").value;
+
+      const tongSan = soSan * giaSan;
+      const tongCau = shuttles.reduce((sum, sh) => {
+        const price = parseMoney(sh.price);
+        const qty = parseFloat(sh.qty) || 0;
+        return sum + (price / BALLS_PER_TUBE) * qty;
+      }, 0);
+      const total = tongSan + tongCau + khac;
+      const perPerson = soNguoi > 0 ? total / soNguoi : 0;
+
+      document.getElementById("tong-san-val").textContent = fmt(tongSan);
+      document.getElementById("m-san").textContent = fmt(tongSan);
+      document.getElementById("m-cau").textContent = fmt(tongCau);
+      document.getElementById("m-per").textContent = fmt(perPerson);
+
+      let brows = `<div class="brow"><span>Tiền sân (${soSan || 0} sân × ${fmt(giaSan)})</span><span>${fmt(tongSan)}</span></div>`;
+      shuttles.forEach(s => {
+        const price = parseMoney(s.price);
+        const qty = parseFloat(s.qty) || 0;
+        const shuttleTotal = (price / BALLS_PER_TUBE) * qty;
+        if (qty > 0) brows += `<div class="brow"><span>${s.name || "Cầu"} (${qty} quả × ${fmt(price / BALLS_PER_TUBE)})</span><span>${fmt(shuttleTotal)}</span></div>`;
+      });
+      if (khac > 0) brows += `<div class="brow"><span>Chi phí khác(nước, trà đá...)</span><span>${fmt(khac)}</span></div>`;
+      brows += `<div class="brow total-row"><span>Tổng cộng</span><span>${fmt(total)}</span></div>`;
+      document.getElementById("breakdown").innerHTML = brows;
+
+      let lines = ["Ting Ting 🌸"];
+      if (tongSan > 0) lines.push(`Tiền sân : ${fmtCopy(tongSan)}`);
+      shuttles.forEach(s => {
+        const price = parseMoney(s.price);
+        const qty = parseFloat(s.qty) || 0;
+        if (qty > 0) lines.push(`Tiền cầu : ${qty} trái x ${fmtCopy(price / BALLS_PER_TUBE)}`);
+      });
+      if (khac > 0) lines.push(`Tiền trà đá : ${fmtCopy(khac)}`);
+      lines.push(`Total : ${fmtCopy(total)} / ${soNguoi || 0}`);
+      lines.push(`Mỗi người : ${fmtCopy(perPerson)}`);
+      if (chuTk.trim()) {
+        lines.push(`Chủ TK: ${chuTk.trim()}`);
+      }
+      if (bankInfo.trim()) {
+        lines.push(bankInfo.trim());
+      }
+      document.getElementById("share-text").textContent = lines.join("\n");
+      saveCache();
+    }
+
+    async function copyText(event) {
+      const text = document.getElementById("share-text").textContent;
+      const btn = event.currentTarget;
+      const orig = btn.textContent;
+      const copied = await writeToClipboard(text);
+
+      if (copied) {
+        btn.textContent = "Đã copy";
+        setTimeout(() => btn.textContent = orig, 1500);
+        return;
+      }
+
+      alert("Trình duyệt đang chặn clipboard. Hãy mở file bằng Chrome/Edge mới nhất hoặc chạy qua localhost.");
+    }
+
+    async function writeToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (error) {
+          // Fall through to the textarea fallback below.
+        }
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.top = "0";
+      textarea.style.left = "-9999px";
+      textarea.style.opacity = "0";
+      document.body.append(textarea);
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+
+      try {
+        return document.execCommand("copy");
+      } catch (error) {
+        return false;
+      } finally {
+        textarea.remove();
+      }
+    }
+
+    function resetAll() {
+      if (!confirm("Làm lại từ đầu?")) return;
+      localStorage.removeItem(CACHE_KEY);
+      applyState(defaultState());
+      renderShuttles();
+      renderSavedAccounts();
+      calc();
+      localStorage.setItem(CACHE_KEY, JSON.stringify(defaultState()));
+    }
+
+    loadCache();
+    renderShuttles();
+    renderSavedAccounts();
+    calc();
+  </script>
+</body>
+
+</html>
